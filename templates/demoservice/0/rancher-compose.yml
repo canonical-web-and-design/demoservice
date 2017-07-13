@@ -1,0 +1,78 @@
+version: 2
+catalog:
+  name: Demo service
+  version: 0.1-rancher
+  description: |
+    Manage ./run demos and github webhooks
+  questions:
+
+    - variable: host_port
+      label: Host port
+      description: |
+        Port that will be exposed on service creation
+      required: true
+      type: int
+      default: 8234
+
+    - variable: github_token
+      label: GitHub token
+      description: |
+        GitHub token to check org membership and update PRs/Issues
+      required: true
+
+    - variable: secret_key
+      label: Django secret key
+      description: |
+        Key so secure main Django app
+      required: true
+
+    - variable: github_webhook_secret
+      label: GitHub webhook secret
+      description: |
+        Secret to verify the signature of GitHub webhooks
+      required: true
+
+    - variable: demo_opt_secret_key
+      label: Secret key for demos
+      description: |
+        Secret key to pass to Django demo environments
+      required: true
+
+    - variable: logstash_service
+      description: Link to logstash service
+      label: Logstash service
+      type: service
+      required: true
+      default: "logstash/logstash-collector"
+
+
+services:
+
+  demoservice-web:
+    scale: 2
+    start_on_create: true
+    health_check:
+      port: 8000
+      request_line: GET / HTTP/1.0
+      interval: 2000
+      response_timeout: 2000
+      healthy_threshold: 2
+      unhealthy_threshold: 3
+      strategy: recreate
+
+  demoservice-worker:
+    scale: 3
+    start_on_create: true
+
+  load-balancer:
+    scale: 1
+    start_on_create: true
+    load_balancer_config:
+      haproxy_config: {}
+    health_check:
+      port: 42
+      interval: 2000
+      response_timeout: 2000
+      healthy_threshold: 2
+      unhealthy_threshold: 3
+      strategy: recreate

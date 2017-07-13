@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>Demos</h1>
+
+  <p>
+    <a href="{% url 'demo_start' %}">&gt; Start or update a demo &lt;</a>
+  </p>
+
+  <p>
+    <a href="{% url 'demo_stop' %}">&gt; Stop a demo &lt;</a>
+  </p>
+
+  <h2>Running demos:</h2>
+  {% if demos %}
+    <ul>
+      {% for demo in demos %}
+        <li>
+          <a href="http://{{ demo.url }}">{{ demo.url }}</a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    No currently running demos found.
+  {% endif %}
+{% endblock %}

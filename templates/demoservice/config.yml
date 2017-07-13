@@ -1,0 +1,5 @@
+name: Demo service
+description: "Manage ./run demos and hooks from pull requests"
+version: "v0.0.1"
+category: Continuous Integration
+maintainer: Canonical Webteam

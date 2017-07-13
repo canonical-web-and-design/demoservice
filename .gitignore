@@ -1,0 +1,5 @@
+*.sqlite
+*.sqlite3
+*.pyc
+__pycache__
+app/demos

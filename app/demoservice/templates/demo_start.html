@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>Start a demo</h1>
+  <form action="{% url 'demo_start' %}" method="post">
+      {% csrf_token %}
+      {{ form.as_ul }}
+      <input type="submit" value="Submit" />
+  </form>
+{% endblock %}
