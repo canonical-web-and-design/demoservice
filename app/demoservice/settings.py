@@ -154,7 +154,6 @@ OPENID_LAUNCHPAD_TEAMS_MAPPING_AUTO = True
 
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
 
-
 # RabbitMQ
 RABBITMQ_HOST = os.environ.get('RABBITMQ_HOST', 'localhost')
 RABBITMQ_PORT = os.environ.get('RABBITMQ_PORT', 5672)
@@ -168,6 +167,7 @@ if DEBUG:
     # In debug, run synchronously
     CELERY_TASK_ALWAYS_EAGER = True
 
+GITHUB_TOKEN = os.environ.get('GITHUB_TOKEN')
 
 DEMO_DIR = '/srv/run.demo.haus-demos/'
 if DEBUG:

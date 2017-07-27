@@ -8,6 +8,7 @@ import shutil
 import socket
 import yaml
 from django.conf import settings
+from github3 import login
 from subprocess import Popen
 
 from demoservice.logging import get_demo_logger
@@ -24,6 +25,12 @@ def _get_open_port():
     port = s.getsockname()[1]
     s.close()
     return port
+
+
+def _is_repo_collaborator(repo_owner, repo_name, user):
+    gh = login('-', password=settings.GITHUB_TOKEN)
+    repo = gh.repository(repo_owner, repo_name)
+    return repo.is_collaborator(user)
 
 
 def get_demo_context(
@@ -107,12 +114,27 @@ def start_demo(
     github_user,
     github_repo,
     github_pr,
+    github_sender=None,
+    github_verify_sender=True,
     context=None,
 ):
     if context:
         logger = get_demo_logger(__name__, **context)
     else:
         logger = logging.getLogger(__name__)
+
+    if github_verify_sender:
+        if not github_sender:
+            logger.error('GitHub webhook sender is not set for verification')
+            return None
+        if not _is_repo_collaborator(github_user, github_repo, github_sender):
+            logger.info(
+                "%s is not a collaborator of this repo", github_sender
+            )
+            return (
+                "User is not a collaborator of this repo. "
+                "Please start demo manually."
+            )
 
     logger.info('Preparing demo: %s', demo_url)
 
