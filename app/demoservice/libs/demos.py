@@ -225,7 +225,9 @@ def start_demo(
         logger.info('Setting demo path to %s', demo_url_path)
 
     # Start ./run server with extra options
-    demo_url_full = ''.join(['http://', demo_url, '/', demo_url_path, '/'])
+    demo_url_full = ''.join(['http://', demo_url, '/'])
+    if demo_url_path:
+        demo_url_full = ''.join([demo_url_full, demo_url_path, '/'])
     logger.info('Starting demo: %s', demo_url_full)
 
     port = _get_open_port()
