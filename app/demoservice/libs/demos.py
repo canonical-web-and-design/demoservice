@@ -228,9 +228,14 @@ def start_demo(
     demo_url_full = ''.join(['http://', demo_url, '/', demo_url_path, '/'])
     logger.info('Starting demo: %s', demo_url_full)
 
+    port = _get_open_port()
+
     docker_options = ''
     docker_labels = {
         'rap.host': demo_url,
+        'traefik.enable': True,
+        'traefik.frontend.rule': 'Host:{url}'.format(url=demo_url),
+        'traefik.port': port,
         'run.demo': True,
         'run.demo.url': demo_url,
         'run.demo.url_full': demo_url_full,
@@ -252,7 +257,6 @@ def start_demo(
 
     run_env = os.environ.copy()
     run_env["CANONICAL_WEBTEAM_RUN_SERVE_DOCKER_OPTS"] = docker_options
-    port = _get_open_port()
     serve_args = ''
     if 'tutorials' in github_repo:
         serve_args = './tutorials/*/'
