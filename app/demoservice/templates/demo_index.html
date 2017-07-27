@@ -13,7 +13,7 @@
           <ul>
             {% for demo in demos %}
               <li>
-                <a href="http://{{ demo.url }}">{{ demo.url }}</a>
+                <a href="{{ demo.url_full }}">{{ demo.url }}</a>
               </li>
             {% endfor %}
           </ul>

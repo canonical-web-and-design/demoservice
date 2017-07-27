@@ -42,9 +42,12 @@ class DemoIndexView(TemplateView):
         demos = []
         for container in demo_containers:
             labels = container.labels
+            url = labels.get('run.demo.url', '')
+            url_full = labels.get('run.demo.url_full', url)
             demo = {
                 'name': container.name,
-                'url': labels.get('run.demo.url', ''),
+                'url': url,
+                'url_full': url_full,
                 'github_user': labels.get('run.demo.github_user', ''),
                 'github_repo': labels.get('run.demo.github_repo', ''),
                 'github_branch': labels.get('run.demo.github_branch', ''),
