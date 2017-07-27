@@ -124,9 +124,16 @@ def start_demo(
         logger = logging.getLogger(__name__)
 
     if github_verify_sender:
+        logger.debug('Verifying if user is collaborator of repo',)
         if not github_sender:
             logger.error('GitHub webhook sender is not set for verification')
             return None
+        logger.debug(
+            'Verifying %s is a collaborator of %s/%s',
+            github_sender,
+            github_user,
+            github_repo,
+        )
         if not _is_repo_collaborator(github_user, github_repo, github_sender):
             logger.info(
                 "%s is not a collaborator of this repo", github_sender
@@ -135,6 +142,7 @@ def start_demo(
                 "User is not a collaborator of this repo. "
                 "Please start demo manually."
             )
+        logger.info('User is a collaborator of the repo')
 
     logger.info('Preparing demo: %s', demo_url)
 
