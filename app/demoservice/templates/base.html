@@ -1,8 +1,32 @@
 <html>
 <head>
   <title>./run demos</title>
+  <link rel="stylesheet" href="https://assets.ubuntu.com/v1/vanilla-framework-version-1.4.2.min.css" />
 </head>
 <body>
+<header id="navigation" class="p-navigation" role="banner">
+  <div class="row">
+    <div class="p-navigation__banner">
+      <div class="p-navigation__logo">
+        <a class="p-navigation__link" href="#">
+          ./run
+        </a>
+      </div>
+      <a href="#navigation" class="p-navigation__toggle--open" title="menu">Menu</a>
+      <a href="#navigation-closed" class="p-navigation__toggle--close" title="close menu">Menu</a>
+    </div>
+    <nav class="p-navigation__nav">
+      <span class="u-off-screen">
+        <a href="#main-content">Jump to main content</a>
+      </span>
+      <ul class="p-navigation__links">
+        <li class="p-navigation__link"><a href="/">Running demos</a></li>
+        <li class="p-navigation__link"><a href="{% url 'demo_start' %}">Start or update a demo</a></li>
+        <li class="p-navigation__link"><a href="{% url 'demo_stop' %}">Stop a demo</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
 {% if messages %}
   <ul class="messages">
     {% for message in messages %}
