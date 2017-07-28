@@ -1,0 +1,9 @@
+.git
+.dockerignore
+app/demos
+app/db.sqlite3
+templates
+.gitlab-ci.yml
+.envrc
+.python-version
+*.pyc

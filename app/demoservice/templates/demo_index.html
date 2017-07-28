@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="strip">
+    <div class="row">
+      <div class="col-12">
+        <h1>Running demos</h1>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-6">
+        {% if demos %}
+          <ul>
+            {% for demo in demos %}
+              <li>
+                <a href="http://{{ demo.url }}">{{ demo.url }}</a>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          No currently running demos found.
+        {% endif %}
+      </div>
+    </div>
+  </div>
+{% endblock %}
