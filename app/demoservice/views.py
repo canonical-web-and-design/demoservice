@@ -50,7 +50,8 @@ class DemoIndexView(TemplateView):
                 'github_branch': labels.get('run.demo.github_branch', ''),
                 'github_pr': labels.get('run.demo.github_pr', ''),
             }
-            demos.append(demo)
+            if demo not in demos:
+                demos.append(demo)
         return demos
 
     def get_context_data(self, **kwargs):
