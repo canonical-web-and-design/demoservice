@@ -29,6 +29,23 @@ def demo_index(request):
     return HttpResponse(running_demos)
 
 
+def _get_github_url(demo):
+    url = ''
+    if demo['github_branch']:
+        url = 'https://github.com/{user}/{repo}/tree/{branch}'.format(
+            user=demo['github_user'],
+            repo=demo['github_repo'],
+            branch=demo['github_branch'],
+        )
+    if demo['github_pr']:
+        url = 'https://github.com/{user}/{repo}/pull/{id}'.format(
+            user=demo['github_user'],
+            repo=demo['github_repo'],
+            id=demo['github_pr'],
+        )
+    return url
+
+
 class DemoIndexView(TemplateView):
     template_name = 'demo_index.html'
 
@@ -54,6 +71,7 @@ class DemoIndexView(TemplateView):
                 'github_branch': labels.get('run.demo.github_branch', ''),
                 'github_pr': labels.get('run.demo.github_pr', ''),
             }
+            demo['github_url'] = _get_github_url(demo)
             if demo not in demos:
                 demos.append(demo)
         demos.sort(key=itemgetter('url'))
