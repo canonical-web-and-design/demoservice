@@ -148,6 +148,7 @@ def start_demo(
 
     os.makedirs(settings.DEMO_DIR, exist_ok=True)
     local_path = os.path.join(settings.DEMO_DIR, demo_url)
+    run_command_path = os.path.join(local_path, 'run')
 
     # Clone repo and update PR
     if not os.path.isdir(local_path):
@@ -161,6 +162,14 @@ def start_demo(
         if return_code > 0:
             logger.error('Error while cloning %s', clone_url)
             return False
+    elif os.path.exists(run_command_path):
+        logger.info('Cleaning previous run script')
+        p = Popen(
+            ['./run', 'clean'],
+            cwd=local_path,
+        )
+        p.wait()
+
     p = Popen(['git', 'reset', '--hard', 'HEAD'], cwd=local_path)
     p.wait()
     if github_pr:
@@ -175,7 +184,6 @@ def start_demo(
             return False
 
     # Check for the run command to continue
-    run_command_path = os.path.join(local_path, 'run')
     if not os.path.exists(run_command_path):
         message = 'No ./run found. Unable to start demo.'
         logger.info(message)
