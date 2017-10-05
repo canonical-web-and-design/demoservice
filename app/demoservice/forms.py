@@ -27,6 +27,7 @@ class DemoStartForm(forms.Form):
             github_repo=self.cleaned_data['github_repo'],
             github_pr=self.cleaned_data['github_pr'],
             send_github_notification=self.cleaned_data['github_notify'],
+            github_verify_sender=False,
         )
         return True
 

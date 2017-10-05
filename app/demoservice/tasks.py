@@ -33,6 +33,8 @@ def start_demo_task(
     github_repo,
     github_pr,
     context,
+    github_sender=None,
+    github_verify_sender=True,
     **kwargs
 ):
     logger = get_demo_logger(__name__, **context)
@@ -44,6 +46,8 @@ def start_demo_task(
             github_user=github_user,
             github_repo=github_repo,
             github_pr=github_pr,
+            github_sender=github_sender,
+            github_verify_sender=github_verify_sender,
             context=context,
         )
     except Exception as e:
@@ -112,6 +116,8 @@ def queue_start_demo(
     github_user,
     github_repo,
     github_pr,
+    github_sender=None,
+    github_verify_sender=True,
     send_github_notification=False,
 ):
     demo_url = get_demo_url_pr(github_repo, github_pr)
@@ -131,7 +137,12 @@ def queue_start_demo(
     )
 
     tasks = [
-        start_demo_task.s(context=context, **context)
+        start_demo_task.s(
+            context=context,
+            github_sender=github_sender,
+            github_verify_sender=github_verify_sender,
+            **context,
+        )
     ]
     if send_github_notification:
         tasks.append(notify_github_task.s(context=context, **context))
