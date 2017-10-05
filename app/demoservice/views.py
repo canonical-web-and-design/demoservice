@@ -4,6 +4,7 @@ import hmac
 import http
 import json
 import logging
+from operator import itemgetter
 from django.conf import settings
 from django.contrib import messages
 from django.http import HttpResponse, HttpResponseForbidden
@@ -55,6 +56,7 @@ class DemoIndexView(TemplateView):
             }
             if demo not in demos:
                 demos.append(demo)
+        demos.sort(key=itemgetter('url'))
         return demos
 
     def get_context_data(self, **kwargs):
