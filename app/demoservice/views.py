@@ -4,6 +4,7 @@ import hmac
 import http
 import json
 import logging
+from operator import itemgetter
 from django.conf import settings
 from django.contrib import messages
 from django.http import HttpResponse, HttpResponseForbidden
@@ -26,6 +27,23 @@ def demo_index(request):
         }
     )
     return HttpResponse(running_demos)
+
+
+def _get_github_url(demo):
+    url = ''
+    if demo['github_branch']:
+        url = 'https://github.com/{user}/{repo}/tree/{branch}'.format(
+            user=demo['github_user'],
+            repo=demo['github_repo'],
+            branch=demo['github_branch'],
+        )
+    if demo['github_pr']:
+        url = 'https://github.com/{user}/{repo}/pull/{id}'.format(
+            user=demo['github_user'],
+            repo=demo['github_repo'],
+            id=demo['github_pr'],
+        )
+    return url
 
 
 class DemoIndexView(TemplateView):
@@ -53,8 +71,10 @@ class DemoIndexView(TemplateView):
                 'github_branch': labels.get('run.demo.github_branch', ''),
                 'github_pr': labels.get('run.demo.github_pr', ''),
             }
+            demo['github_url'] = _get_github_url(demo)
             if demo not in demos:
                 demos.append(demo)
+        demos.sort(key=itemgetter('url'))
         return demos
 
     def get_context_data(self, **kwargs):

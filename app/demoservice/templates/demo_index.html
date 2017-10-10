@@ -8,15 +8,30 @@
       </div>
     </div>
     <div class="row">
-      <div class="col-6">
+      <div class="col-12">
         {% if demos %}
-          <ul>
-            {% for demo in demos %}
-              <li>
-                <a href="{{ demo.url_full }}">{{ demo.url }}</a>
-              </li>
-            {% endfor %}
-          </ul>
+        <table class="p-table" role="grid">
+            <thead>
+              <tr role="row">
+                <th scope="col" role="columnheader" id="t-url" aria-sort="none">Name</th>
+                <th scope="col" role="columnheader" id="t-github" aria-sort="none">GitHub</th>
+              </tr>
+            </thead>
+            <tbody>
+              <ul>
+                {% for demo in demos %}
+                  <tr role="row">
+                    <td role="gridcell">
+                      <a href="{{ demo.url_full }}">{{ demo.url }}</a>
+                    </td>
+                    <td role="gridcell">
+                      <a href="{{ demo.github_url }}" class="p-link--external">GitHub</a>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </ul>
+            </tbody>
+          </table>
         {% else %}
           No currently running demos found.
         {% endif %}
