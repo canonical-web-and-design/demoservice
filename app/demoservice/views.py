@@ -72,7 +72,10 @@ class DemoIndexView(TemplateView):
                 'github_pr': labels.get('run.demo.github_pr', ''),
             }
             demo['github_url'] = _get_github_url(demo)
-            if demo not in demos:
+            is_duplicate_demo = any(
+                _demo['url'] == url for _demo in demos
+            )
+            if not is_duplicate_demo:
                 demos.append(demo)
         demos.sort(key=itemgetter('url'))
         return demos
