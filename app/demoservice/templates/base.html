@@ -28,13 +28,21 @@
     </nav>
   </div>
 </header>
-{% if messages %}
-  <ul class="messages">
+  {% if messages %}
     {% for message in messages %}
-      <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+    <div class="p-strip">
+      <div class="row">
+        <div class="col-12">
+          <div class="p-notification">
+            <p class="p-notification__response {% if message.tags %}{{ message.tags }}{% endif %}">
+              {{ message }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
     {% endfor %}
-  </ul>
-{% endif %}
+  {% endif %}
   {% block content %}
   {% endblock %}
 </body>
