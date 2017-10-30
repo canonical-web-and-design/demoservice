@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+REPO="${1}"
+PR_ID="${2}"
+
+docker run --rm --detach \
+    -l run.demo.url=${REPO}-pr-${PR_ID}.run.demo.haus \
+    -l run.demo.url_full=http://${REPO}-pr-${PR_ID}.run.demo.haus/ \
+    -l run.demo.github_pr=${PR_ID} \
+    -l run.demo.github_user=canonical-websites \
+    -l run.demo.github_repo=${REPO} \
+    -l run.demo=True \
+    -l run.demo.fake=True \
+    ipfaffy/docker-test-http-server
