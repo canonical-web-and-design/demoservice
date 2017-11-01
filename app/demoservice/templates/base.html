@@ -29,19 +29,19 @@
   </div>
 </header>
   {% if messages %}
-    {% for message in messages %}
     <div class="p-strip">
       <div class="row">
         <div class="col-12">
-          <div class="p-notification">
-            <p class="p-notification__response {% if message.tags %}{{ message.tags }}{% endif %}">
-              {{ message }}
-            </p>
-          </div>
+          {% for message in messages %}
+            <div class="p-notification">
+              <p class="p-notification__response {% if message.tags %}{{ message.tags }}{% endif %}">
+                {{ message }}
+              </p>
+            </div>
+          {% endfor %}
         </div>
       </div>
     </div>
-    {% endfor %}
   {% endif %}
   {% block content %}
   {% endblock %}
