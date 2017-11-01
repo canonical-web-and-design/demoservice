@@ -33,7 +33,13 @@
       <div class="row">
         <div class="col-12">
           {% for message in messages %}
-            <div class="p-notification">
+            {% if message.tags == "success" %}
+              <div class="p-notification--positive">
+            {% elif message.tags == "error" %}
+              <div class="p-notification--negative">
+            {% else %}
+              <div class="p-notification">
+            {% endif %}
               <p class="p-notification__response {% if message.tags %}{{ message.tags }}{% endif %}">
                 {{ message }}
               </p>
