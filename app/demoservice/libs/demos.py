@@ -242,7 +242,6 @@ def start_demo(
 
     docker_options = ''
     docker_labels = {
-        'rap.host': demo_url,
         'traefik.enable': 'true',
         'traefik.frontend.rule': 'Host:{url}'.format(url=demo_url),
         'traefik.port': port,
