@@ -14,7 +14,7 @@ from subprocess import Popen
 from demoservice.logging import get_demo_logger
 
 
-DEMO_PR_URL_TEMPLATE = '{repo_name}-pr-{github_pr}.run.demo.haus'
+DEMO_PR_URL_TEMPLATE = '{repo_name}-{org_name}-pr-{github_pr}.run.demo.haus'
 GITHUB_CLONE_URL = 'https://github.com/{github_user}/{github_repo}.git'
 
 
@@ -47,11 +47,12 @@ def get_demo_context(
     }
 
 
-def get_demo_url_pr(repo_name, github_pr):
+def get_demo_url_pr(org_name, repo_name, github_pr):
     return DEMO_PR_URL_TEMPLATE.format(
+        org_name=org_name,
         repo_name=repo_name,
         github_pr=github_pr,
-    )
+    ).lower()
 
 
 def notify_github_pr(

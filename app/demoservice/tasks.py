@@ -120,7 +120,7 @@ def queue_start_demo(
     github_verify_sender=True,
     send_github_notification=False,
 ):
-    demo_url = get_demo_url_pr(github_repo, github_pr)
+    demo_url = get_demo_url_pr(github_user, github_repo, github_pr)
     context = get_demo_context(
         demo_url=demo_url,
         github_user=github_user,
@@ -154,7 +154,7 @@ def queue_stop_demo(
     github_repo,
     github_pr,
 ):
-    demo_url = get_demo_url_pr(github_repo, github_pr)
+    demo_url = get_demo_url_pr(github_user, github_repo, github_pr)
     context = get_demo_context(
         demo_url=demo_url,
         github_user=github_user,
