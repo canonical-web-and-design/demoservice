@@ -7,13 +7,14 @@ import requests
 import shutil
 import socket
 import yaml
+from distutils.version import StrictVersion
+from subprocess import Popen, check_output
 from django.conf import settings
 from github3 import login
-from subprocess import Popen
 
 from demoservice.logging import get_demo_logger
 
-
+MIN_RUNSCRIPT_VERSION = '2.0.0'
 DEMO_PR_URL_TEMPLATE = '{repo_name}-{org_name}-pr-{github_pr}.run.demo.haus'
 GITHUB_CLONE_URL = 'https://github.com/{github_user}/{github_repo}.git'
 
@@ -190,11 +191,18 @@ def start_demo(
         logger.info(message)
         return message
 
-    # Check to see it is updated for this script
-    docker_option_string = '${run_serve_docker_opts}'
-    run_file_contents = open(run_command_path).read()
-    if docker_option_string not in run_file_contents:
-        message = './run is not compatible for demos and needs updating.'
+    # Check the project has the minimum required version of ./run
+    run_script_version = (
+        check_output(["./run", "--version"], cwd=local_path)
+        .decode("utf-8")
+        .rstrip()
+        .split("@")[-1]
+    )
+
+    if StrictVersion(run_script_version) < StrictVersion(MIN_RUNSCRIPT_VERSION):
+        message = (
+            "Unable to start demo. Minimum required version of ./run script is {}"
+        ).format(MIN_RUNSCRIPT_VERSION)
         logger.info(message)
         return message
 
