@@ -2,22 +2,35 @@
 
 Spin up ./run demos!
 
+This service starts demos automatically from GitHub webhooks, as well as manually. For a full overview of this application, view [OVERVIEW.md](OVERVIEW.md).
 
-## Dev
+Information about our deployments can be found on our [Google Drive document](https://docs.google.com/document/d/1Yw0uU9zp1Tc2l01loDSTdhc72LibSHYytWRLTVhCB58/edit)
+
+## Quickstart development
 
 ### The demoservice app
 
-The current recommended method for starting the server is to set up a Python 3 virtual env and run:
+#### The easy way (Docker - Untested)
 
-``` bash
-python3 ./app/manage.py runserver
-```
-
-Alternatively you can use Docker with a little helper script which *should* run.
+The service can be started with a helper script to run it inside Docker. This runs on http://0.0.0.0:8000 and is lightly tested. It should work well for simple development.
 
 ``` bash
 ./bin/start_docker_dev
 ```
+
+Check the instructions below for running fake demos if you want to quickly update templates.
+
+#### The hard way (Python virtual env)
+
+The current recommended method for starting the server is to set up a Python 3 virtual env and run:
+
+``` bash
+DJANGO_DEBUG=True python3 ./app/manage.py runserver
+```
+
+Running the service with `DJANGO_DEBUG=True` will run the database as sqlite and run the message queue tasks immediately without using a message queue.
+
+The official Python documentation has a page on [virtual environments](https://docs.python.org/3/tutorial/venv.html). Another great option is [pyenv](https://github.com/pyenv/pyenv) with [pyenv-virtualenv](https://github.com/pyenv/pyenv-virtualenv).
 
 ### (Optional) Running fake demos
 
@@ -28,26 +41,25 @@ The UI isn't useful without running demos. If you want to run a demo, there is a
 ./bin/create_fake_demo www.ubuntu.com 123
 ```
 
-They will run in the background. Delete the demos with:
+They will run in the background. Delete all the demos with:
 
 ``` bash
-# ./bin/create_fake_demo [repo_name] [pull_request_id]
 ./bin/delete_fake_demos
 ```
 
 ### (Very optional) Spinning up workers in dev
 
-This isn't needed except for in depth testing.
+This isn't needed except for in deeper testing of the message queue.
 
-The app is set to run jobs synchronously in DEBUG mode. When you start a demo it will run the job in the Django server rather than running it in the background.
+While in debug mode, the app will not use a message queue. Instead it will start the jobs synchronously during the request, rather than queue it to run in the background.
 If you want to test, you can:
 
-Run a RabbitMQ server with Docker:
+Run a disposable RabbitMQ server with Docker:
 ```
 docker run --rm -p 5672:5672 --hostname rabbitmq --name rabbitmq rabbitmq:3
 ```
 
-Start Celery workers:
+Start Celery workers inside Python virtual environment:
 ```
 cd app
 celery -A tasks worker --loglevel=info
