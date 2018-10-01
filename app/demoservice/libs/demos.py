@@ -212,6 +212,7 @@ def start_demo(
 
     # Stop bower complaining about running as root...
     # This actually updates the run command for now and resets on rerun
+    run_file_contents = open(run_command_path).read()
     bower_string = 'bower install'
     bower_string_for_root = 'bower install --allow-root'
     if bower_string_for_root not in run_file_contents:
