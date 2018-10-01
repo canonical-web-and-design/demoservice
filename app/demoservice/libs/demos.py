@@ -6,7 +6,6 @@ import re
 import requests
 import shutil
 import socket
-import time
 import yaml
 from distutils.version import StrictVersion
 from subprocess import Popen, check_output
@@ -173,12 +172,7 @@ def start_demo(
         )
         p.wait()
 
-    p = Popen(['git', 'reset', '--hard', 'HEAD'], cwd=local_path)
-    p.wait()
     if github_pr:
-        # Wait for GitHub PR refs to update.
-        time.sleep(10)
-
         logger.info('Pulling PR branch for %s', github_pr)
         p = Popen(
             ['git', 'pr', str(github_pr)],
@@ -188,6 +182,9 @@ def start_demo(
         if return_code > 0:
             logger.error('Error while pulling PR %s branch', github_pr)
             return False
+
+    p = Popen(['git', 'reset', '--hard', 'HEAD'], cwd=local_path)
+    p.wait()
 
     # Check for the run command to continue
     if not os.path.exists(run_command_path):
