@@ -6,6 +6,7 @@ import re
 import requests
 import shutil
 import socket
+import time
 import yaml
 from distutils.version import StrictVersion
 from subprocess import Popen, check_output
@@ -175,6 +176,9 @@ def start_demo(
     p = Popen(['git', 'reset', '--hard', 'HEAD'], cwd=local_path)
     p.wait()
     if github_pr:
+        # Wait for GitHub PR refs to update.
+        time.sleep(10)
+
         logger.info('Pulling PR branch for %s', github_pr)
         p = Popen(
             ['git', 'pr', str(github_pr)],
