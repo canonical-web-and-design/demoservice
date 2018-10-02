@@ -8,6 +8,7 @@ from operator import itemgetter
 from django.conf import settings
 from django.contrib import messages
 from django.http import HttpResponse, HttpResponseForbidden
+from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import FormView
@@ -81,13 +82,13 @@ class DemoIndexView(TemplateView):
         return demos
 
     def get_context_data(self, **kwargs):
-        context = super(DemoIndexView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context['demos'] = self._get_running_demos()
         return context
 
 
 class DemoStartView(FormView):
-    template_name = 'demo_start.html'
+    template_name = 'demo_form.html'
     form_class = DemoStartForm
     success_url = '/'
 
@@ -107,9 +108,15 @@ class DemoStartView(FormView):
             messages.success(self.request, 'Demo starting...')
         return super(DemoStartView, self).form_valid(form)
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["form_name"] = "Start or update a demo"
+        context["form_action"] = reverse("demo_start")
+        return context
+
 
 class DemoStopView(FormView):
-    template_name = 'demo_stop.html'
+    template_name = 'demo_form.html'
     form_class = DemoStopForm
     success_url = '/'
 
@@ -129,6 +136,11 @@ class DemoStopView(FormView):
             messages.success(self.request, 'Demo stopping...')
         return super(DemoStopView, self).form_valid(form)
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form_name'] = "Stop a demo"
+        context["form_action"] = reverse("demo_stop")
+        return context
 
 @csrf_exempt
 def github_webhook(request):
