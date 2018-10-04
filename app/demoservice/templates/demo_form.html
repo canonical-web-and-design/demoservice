@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="strip">
+    <div class="row">
+      <div class="col-12">
+        <h1>{{form_name}}</h1>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-6">
+        <form class="p-form" action="{{form_action}}" method="post">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="p-form__group {%if field.errors %}p-form-validation is-error{% endif %}">
+                    {% if field.field.widget.input_type != "checkbox" %}
+                        <label for="{{field.id_for_label}}" class="p-form__label">{{field.label}}</label>
+                    {% endif %}
+                    <div class="p-form__control">
+                        {% if field.help_text %}
+                            <p class="p-form-help-text">{{field.help_text}}</p>
+                        {% endif %}
+                        {% for error in field.errors %}
+                            <span><strong>Error: </strong>{{error}}</span>
+                        {% endfor %}
+                        <input 
+                            id="{{field.auto_id}}" 
+                            name="{{field.html_name}}" 
+                            type="{{field.field.widget.input_type}}"
+                            {% if field.initial %}value="{{field.initial}}"{% endif %}
+                            {% if field.required %}required{% endif %}
+                            {%if field.errors %}class="p-form-validation__input"{% endif %}
+                        />
+                        {% if field.field.widget.input_type == "checkbox" %}
+                            <label for="{{field.id_for_label}}" class="p-form__label">{{field.label}}</label>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor%}
+            <br />
+            <input class="p-button--positive" type="submit" value="Submit" />
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+{% block scripts %}
+<script type="text/javascript">
+    var GITHUB_REGEX = /^https:\/\/github.com\/([-._\w]+)\/([-._\w]+)\/pull\/(\d+)$/i;
+
+    function fillForm(url) {
+        var match = url.match(GITHUB_REGEX);
+        if (match != null) {
+            document.querySelector("#id_github_pr").setAttribute("value", match[3]);
+            document.querySelector("#id_github_repo").setAttribute("value", match[2]);
+            document.querySelector("#id_github_user").setAttribute("value", match[1]);
+        } else {
+            document.querySelector("#id_github_pr").setAttribute("value", "");
+            document.querySelector("#id_github_repo").setAttribute("value", "");
+            document.querySelector("#id_github_user").setAttribute("value", "");
+        }
+    }
+
+    function enable(selector) {
+        document.querySelector(selector).removeAttribute("disabled");
+    }
+
+    function disable(selector) {
+        document.querySelector(selector).setAttribute("disabled", false);
+    }
+
+    document.querySelector('#id_github_url').addEventListener('input', function(e) {
+        var value = e.target.value;
+
+        if (value == null || value == "") {
+            enable("#id_github_pr");
+            enable("#id_github_repo");
+            enable("#id_github_user");
+        } else {
+            disable("#id_github_pr");
+            disable("#id_github_repo");
+            disable("#id_github_user");
+        }
+
+        fillForm(value);
+    });
+</script>
+{% endblock %}
