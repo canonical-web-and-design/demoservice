@@ -28,7 +28,7 @@
                             name="{{field.html_name}}" 
                             type="{{field.field.widget.input_type}}"
                             {% if field.initial %}value="{{field.initial}}"{% endif %}
-                            {% if field.required %}required{% endif %}
+                            {% if field.field.required %}required{% endif %}
                             {%if field.errors %}class="p-form-validation__input"{% endif %}
                         />
                         {% if field.field.widget.input_type == "checkbox" %}
@@ -48,40 +48,44 @@
 <script type="text/javascript">
     var GITHUB_REGEX = /^https:\/\/github.com\/([-._\w]+)\/([-._\w]+)\/pull\/(\d+)$/i;
 
-    function fillForm(url) {
-        var match = url.match(GITHUB_REGEX);
-        if (match != null) {
-            document.querySelector("#id_github_pr").setAttribute("value", match[3]);
-            document.querySelector("#id_github_repo").setAttribute("value", match[2]);
-            document.querySelector("#id_github_user").setAttribute("value", match[1]);
-        } else {
-            document.querySelector("#id_github_pr").setAttribute("value", "");
-            document.querySelector("#id_github_repo").setAttribute("value", "");
-            document.querySelector("#id_github_user").setAttribute("value", "");
-        }
-    }
-
     function enable(selector) {
-        document.querySelector(selector).removeAttribute("disabled");
+        document.getElementById(selector).removeAttribute("disabled");
     }
 
     function disable(selector) {
-        document.querySelector(selector).setAttribute("disabled", false);
+        document.getElementById(selector).setAttribute("disabled", false);
     }
 
-    document.querySelector('#id_github_url').addEventListener('input', function(e) {
-        var value = e.target.value;
+    function fillForm(value) {
+        var match = value.match(GITHUB_REGEX);
+        if (match != null) {
+            document.getElementById("id_github_pr").value = match[3];
+            document.getElementById("id_github_repo").value = match[2];
+            document.getElementById("id_github_user").value = match[1];
+        } 
 
         if (value == null || value == "") {
-            enable("#id_github_pr");
-            enable("#id_github_repo");
-            enable("#id_github_user");
+            document.getElementById("id_github_pr").value = "";
+            document.getElementById("id_github_repo").value = "";
+            document.getElementById("id_github_user").value = "";
+            enable("id_github_pr");
+            enable("id_github_repo");
+            enable("id_github_user");
         } else {
-            disable("#id_github_pr");
-            disable("#id_github_repo");
-            disable("#id_github_user");
+            disable("id_github_pr");
+            disable("id_github_repo");
+            disable("id_github_user");
         }
+    }
 
+    // If there is a valid GitHub URL in the url params atempt to fill the form
+    if (window.location.search.search(GITHUB_REGEX)) {
+        fillForm(document.getElementById("id_github_url").value);
+    }
+
+    // Add input listener too the URL field
+    document.getElementById('id_github_url').addEventListener('input', function(e) {
+        var value = e.target.value;
         fillForm(value);
     });
 </script>
