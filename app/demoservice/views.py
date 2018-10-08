@@ -16,6 +16,8 @@ from django.views.generic.edit import FormView
 from demoservice.forms import DemoStartForm, DemoStopForm
 from demoservice.libs.github import handle_webhook
 
+
+DEFAULT_VCS_USER = 'canonical-websites'
 logger = logging.getLogger(__name__)
 
 
@@ -97,7 +99,16 @@ class DemoStartView(FormView):
         Returns the initial data to use for forms on this view.
         """
         initial = super().get_initial()
-        initial['github_user'] = 'canonical-websites'
+        params = self.request.GET
+
+        url = params.get('url')
+        if url:
+            initial['github_url'] = url
+        else:
+            initial['github_pr'] = params.get('pr', '')
+            initial['github_repo'] = params.get('repo', '')
+            initial['github_user'] = params.get('user', DEFAULT_VCS_USER)
+
         return initial
 
     def form_valid(self, form):
@@ -125,7 +136,16 @@ class DemoStopView(FormView):
         Returns the initial data to use for forms on this view.
         """
         initial = super().get_initial()
-        initial['github_user'] = 'canonical-websites'
+        params = self.request.GET
+
+        url = params.get('url')
+        if url:
+            initial['github_url'] = url
+        else:
+            initial['github_pr'] = params.get('pr', '')
+            initial['github_repo'] = params.get('repo', '')
+            initial['github_user'] = params.get('user', DEFAULT_VCS_USER)
+
         return initial
 
     def form_valid(self, form):
@@ -141,6 +161,7 @@ class DemoStopView(FormView):
         context['form_name'] = "Stop a demo"
         context["form_action"] = reverse("demo_stop")
         return context
+
 
 @csrf_exempt
 def github_webhook(request):
@@ -158,7 +179,7 @@ def github_webhook(request):
         settings.GITHUB_WEBHOOK_SECRET.encode('ascii'),
         request.body,
         hashlib.sha1
-        )
+    )
     expected_signature = 'sha1=' + signature.hexdigest()
     if not hmac.compare_digest(github_signature, expected_signature):
         logger.debug('Invalid webhook signature.')
