@@ -11,6 +11,7 @@ from distutils.version import StrictVersion
 from subprocess import Popen, check_output
 from django.conf import settings
 from github3 import login
+from github3.models import GitHubError
 
 from demoservice.logging import get_demo_logger
 
@@ -85,7 +86,7 @@ def notify_github_pr(
     logger.debug('GitHub comment API URL: %s', api_url)
     logger.info('Commenting on pull request: %s', comment['body'])
 
-    github_token = os.getenv('GITHUB_TOKEN')
+    github_token = settings.GITHUB_TOKEN
     if not github_token:
         logger.warning('Missing GITHUB_TOKEN environment variable')
         return None
@@ -136,14 +137,32 @@ def start_demo(
             github_user,
             github_repo,
         )
-        if not _is_repo_collaborator(github_user, github_repo, github_sender):
-            logger.info(
-                "%s is not a collaborator of this repo", github_sender
-            )
-            return (
-                "User is not a collaborator of this repo. "
-                "Please start demo manually."
-            )
+        try:
+            if not _is_repo_collaborator(
+                github_user,
+                github_repo,
+                github_sender
+            ):
+                logger.info(
+                    "%s is not a collaborator of this repo", github_sender
+                )
+                return (
+                    "User is not a collaborator of this repo. "
+                    "Please start demo manually."
+                )
+        except GitHubError as ge:
+            # If user does not have permission to check repo collaborators
+            # an exception with the 403 code is expected.
+            if 403 == ge.code:
+                gh = login('-', password=settings.GITHUB_TOKEN)
+                bot = gh.user().login
+                return (
+                    "User {bot} does not have enough permissions "
+                    "to perform necessary checks. "
+                    "Please review user permissions for this repository."
+                ).format(bot=bot)
+            return "There was a GitHub API error."
+
         logger.info('User is a collaborator of the repo')
 
     logger.info('Preparing demo: %s', demo_url)
@@ -202,7 +221,8 @@ def start_demo(
 
     if StrictVersion(run_script_version) < StrictVersion(MIN_RUNSCRIPT_VERSION):
         message = (
-            "Unable to start demo. Minimum required version of ./run script is {}"
+            "Unable to start demo. Minimum required "
+            "version of ./run script is {}"
         ).format(MIN_RUNSCRIPT_VERSION)
         logger.info(message)
         return message
