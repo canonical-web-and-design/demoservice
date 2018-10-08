@@ -15,6 +15,7 @@
               <tr role="row">
                 <th scope="col" role="columnheader" id="t-url" aria-sort="none">Name</th>
                 <th scope="col" role="columnheader" id="t-github" aria-sort="none">GitHub</th>
+                <th scope="col" role="columnheader" id="t-github" aria-sort="none">Options</th>
               </tr>
             </thead>
             <tbody>
@@ -26,6 +27,11 @@
                     </td>
                     <td role="gridcell">
                       <a href="{{ demo.github_url }}" class="p-link--external">GitHub</a>
+                    </td>
+                    <td role="gridcell">
+                      <a href="{% url 'demo_start'%}?url={{ demo.github_url }}">Update</a>
+                      <span> | </span>
+                      <a href="{% url 'demo_stop' %}?url={{ demo.github_url }}">Stop</a>
                     </td>
                   </tr>
                 {% endfor %}
