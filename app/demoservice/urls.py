@@ -24,6 +24,7 @@ from demoservice.views import (
     DemoStartView,
     DemoStopView,
     github_webhook,
+    launchpad_webhook
 )
 
 
@@ -37,6 +38,7 @@ def _login_required(function, *args, **kwargs):
 urlpatterns = [
     url(r'^openid/', include('django_openid_auth.urls')),
     url(r'^webhook/github$', github_webhook),
+    url(r'^webhook/launchpad$', launchpad_webhook),
     url(
         r'^start$',
         _login_required(DemoStartView.as_view()),

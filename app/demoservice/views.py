@@ -16,7 +16,6 @@ from django.views.generic.edit import FormView
 from demoservice.forms import DemoStartForm, DemoStopForm
 from demoservice.libs.github import handle_webhook
 
-
 DEFAULT_VCS_USER = 'canonical-websites'
 logger = logging.getLogger(__name__)
 
@@ -163,6 +162,22 @@ class DemoStopView(FormView):
         return context
 
 
+def _validate_webhook_signature(request, remote_signature, webhook_secret):
+    """ Validate webhook is legit using X_HUB_SIGNATURE"""
+    if not remote_signature:
+        logger.debug('Missing HTTP_X_HUB_SIGNATURE HTTP header')
+        return HttpResponseForbidden('Missing signature header')
+    signature = hmac.new(
+        webhook_secret.encode('ascii'),
+        request.body,
+        hashlib.sha1
+    )
+    expected_signature = 'sha1=' + signature.hexdigest()
+    if not hmac.compare_digest(remote_signature, expected_signature):
+        logger.debug('Invalid webhook signature.')
+        return HttpResponseForbidden('Invalid signature header')
+
+
 @csrf_exempt
 def github_webhook(request):
     """ https://gist.github.com/grantmcconnaughey/6169d8b7a2e770e85c5617bc80ed00a9
@@ -172,18 +187,12 @@ def github_webhook(request):
     github_signature = request.META.get(
         'HTTP_X_HUB_SIGNATURE', None
     )
-    if not github_signature:
-        logger.debug('Missing HTTP_X_HUB_SIGNATURE HTTP header')
-        return HttpResponseForbidden('Missing signature header')
-    signature = hmac.new(
-        settings.GITHUB_WEBHOOK_SECRET.encode('ascii'),
-        request.body,
-        hashlib.sha1
+
+    _validate_webhook_signature(
+        request,
+        github_signature,
+        settings.GITHUB_WEBHOOK_SECRET
     )
-    expected_signature = 'sha1=' + signature.hexdigest()
-    if not hmac.compare_digest(github_signature, expected_signature):
-        logger.debug('Invalid webhook signature.')
-        return HttpResponseForbidden('Invalid signature header')
 
     # Sometimes the payload comes in as the request body, sometimes it comes in
     # as a POST parameter. This will handle either case.
@@ -195,5 +204,37 @@ def github_webhook(request):
     event = request.META['HTTP_X_GITHUB_EVENT']
 
     handle_webhook(event, payload)
+
+    return HttpResponse('Webhook received', status=http.HTTPStatus.ACCEPTED)
+
+
+@csrf_exempt
+def launchpad_webhook(request):
+    """ https://gist.github.com/grantmcconnaughey/6169d8b7a2e770e85c5617bc80ed00a9
+    """
+    # Check the X-Hub-Signature header to make sure this is a valid request.
+    logger.debug('Receiving Launchpad webook. Verifying signature.')
+
+    launchpad_signature = request.META.get(
+        'HTTP_X_HUB_SIGNATURE', None
+    )
+
+    _validate_webhook_signature(
+        request,
+        launchpad_signature,
+        settings.LAUNCHPAD_WEBHOOK_SECRET
+    )
+
+    # Sometimes the payload comes in as the request body, sometimes it comes in
+    # as a POST parameter. This will handle either case.
+    if 'payload' in request.POST:
+        payload = json.loads(request.POST['payload'].decode("utf8"))
+    else:
+        payload = json.loads(request.body.decode("utf8"))
+
+    event = request.META['HTTP_X_LAUNCHPAD_EVENT_TYPE']
+
+    logger.debug("Event: %s", event)
+    logger.debug("Payload: %s", payload)
 
     return HttpResponse('Webhook received', status=http.HTTPStatus.ACCEPTED)
