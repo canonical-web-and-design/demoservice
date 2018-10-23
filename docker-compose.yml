@@ -1,0 +1,34 @@
+version: "3"
+services:
+  demoservice-web:
+    build: .
+    command: ./start_web.sh
+    privileged: true
+    volumes:
+      - .:/app
+      - /var/run/docker.sock:/var/run/docker.sock
+    env_file:
+      - .env
+    ports:
+      - "8099:8000"
+    depends_on:
+      - demoservice-rabbit
+
+  demoservice-worker:
+    build: .
+    command: ./start_celery.sh
+    privileged: true
+    volumes:
+      - .:/app
+      - /var/run/docker.sock:/var/run/docker.sock
+    env_file:
+      - .env
+    depends_on:
+      - demoservice-rabbit
+
+  demoservice-rabbit:
+    hostname: demoservice-rabbit
+    image: rabbitmq:3.6
+    environment:
+     - "RABBITMQ_DEFAULT_USER=guest"
+     - "RABBITMQ_DEFAULT_PASS=guest"

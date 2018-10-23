@@ -1,3 +1,0 @@
-#!/usr/bin/env bash
-
-docker run -it --rm --name demoservice-dev --privileged -v /var/run/docker.sock:/var/run/docker.sock -e DJANGO_DEBUG=True -p 8000:8000 -v "$PWD":/srv -w /srv python:3 bash -c "pip3 install -r requirements.txt && python3 ./app/manage.py runserver 0.0.0.0:8000"

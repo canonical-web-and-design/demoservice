@@ -163,9 +163,8 @@ CELERY_BROKER_URL = 'amqp://guest:guest@{host}:{port}//'.format(
     host=RABBITMQ_HOST,
     port=RABBITMQ_PORT,
 )
-if DEBUG:
-    # In debug, run synchronously
-    CELERY_TASK_ALWAYS_EAGER = True
+
+CELERY_TASK_ALWAYS_EAGER = os.environ.get("CELERY_TASK_ALWAYS_EAGER", False)
 
 GITHUB_TOKEN = os.environ.get('GITHUB_TOKEN')
 

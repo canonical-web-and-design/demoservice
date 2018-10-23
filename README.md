@@ -10,13 +10,21 @@ Information about our deployments can be found on our [Google Drive document](ht
 
 ### The demoservice app
 
-#### The easy way (Docker - Untested)
+#### Docker Compose
 
-The service can be started with a helper script to run it inside Docker. This runs on http://0.0.0.0:8000 and is lightly tested. It should work well for simple development.
+A close version to the production set up can be started using docker compose. All services are defined under docker-compose.yml in the project root.
 
 ``` bash
-./bin/start_docker_dev
+docker-compose up
 ```
+
+    or if you want to run it in the background
+
+``` bash
+docker-compose up -d
+```
+
+This runs on the web app on http://0.0.0.0:8099. It should work well for simple development.
 
 Check the instructions below for running fake demos if you want to quickly update templates.
 
@@ -25,7 +33,7 @@ Check the instructions below for running fake demos if you want to quickly updat
 The current recommended method for starting the server is to set up a Python 3 virtual env and run:
 
 ``` bash
-DJANGO_DEBUG=True python3 ./app/manage.py runserver
+DJANGO_DEBUG=True CELERY_TASK_ALWAYS_EAGER=True python3 ./app/manage.py runserver
 ```
 
 Running the service with `DJANGO_DEBUG=True` will run the database as sqlite and run the message queue tasks immediately without using a message queue.
@@ -45,22 +53,4 @@ They will run in the background. Delete all the demos with:
 
 ``` bash
 ./bin/delete_fake_demos
-```
-
-### (Very optional) Spinning up workers in dev
-
-This isn't needed except for in deeper testing of the message queue.
-
-While in debug mode, the app will not use a message queue. Instead it will start the jobs synchronously during the request, rather than queue it to run in the background.
-If you want to test, you can:
-
-Run a disposable RabbitMQ server with Docker:
-```
-docker run --rm -p 5672:5672 --hostname rabbitmq --name rabbitmq rabbitmq:3
-```
-
-Start Celery workers inside Python virtual environment:
-```
-cd app
-celery -A tasks worker --loglevel=info
 ```
