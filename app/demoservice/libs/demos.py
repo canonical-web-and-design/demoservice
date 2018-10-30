@@ -52,8 +52,8 @@ def get_demo_context(
 
 def get_demo_url_pr(org_name, repo_name, github_pr):
     return DEMO_PR_URL_TEMPLATE.format(
-        org_name=org_name,
-        repo_name=repo_name,
+        org_name=org_name.replace(".", "-"),
+        repo_name=repo_name.replace(".", "-"),
         github_pr=github_pr,
     ).lower()
 
@@ -265,7 +265,7 @@ def start_demo(
         logger.info('Setting demo path to %s', demo_url_path)
 
     # Start ./run server with extra options
-    demo_url_full = ''.join(['http://', demo_url, '/'])
+    demo_url_full = ''.join(['https://', demo_url, '/'])
     if demo_url_path:
         demo_url_full = ''.join([demo_url_full, demo_url_path, '/'])
     logger.info('Starting demo: %s', demo_url_full)
