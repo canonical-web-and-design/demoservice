@@ -176,7 +176,7 @@ GITHUB_WEBHOOK_SECRET = os.environ.get('GITHUB_WEBHOOK_SECRET')
 LAUNCHPAD_WEBHOOK_SECRET = os.environ.get('LAUNCHPAD_WEBHOOK_SECRET')
 
 DOCKERFILE_REPO_TEMPLATE = (
-    "https://raw.githubusercontent.com/jpmartinspt/dockerfiles/master/"
+    "https://raw.githubusercontent.com/canonical-webteam/dockerfiles/master/"
     "{}/{}/{}"
 )
 
