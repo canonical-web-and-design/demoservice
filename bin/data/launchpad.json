@@ -1,0 +1,11 @@
+{
+  "action": "modified",
+  "merge_proposal": "~canonical-webteam/ledemo/+git/ledemo/+merge/358015",
+  "new": {
+    "source_git_path": "refs/heads/add_readme",
+    "source_git_repository": "/~canonical-webteam/maas/+git/ledemo",
+    "target_git_repository": "/~canonical-webteam/ledemo/+git/ledemo"
+  },
+  "old": {
+  }
+}

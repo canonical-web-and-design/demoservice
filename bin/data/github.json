@@ -1,0 +1,13 @@
+{
+  "action": "opened",
+  "number": 9000,
+  "repository": {
+    "name": "snapcraft.io",
+    "owner": {
+      "login": "canonical-websites",
+    }
+  },
+  "sender": {
+    "login": "jpmartinspt",
+  }
+}

@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+FILE="${1}"
+
+curl -X POST \
+    --header "X-GITHUB-EVENT: pull_request" \
+    -d @${FILE} \
+    http://localhost:8099/webhook/github
