@@ -3,6 +3,8 @@ import json
 import logging
 import os
 import re
+import urllib
+import docker
 import requests
 import shutil
 import socket
@@ -12,7 +14,6 @@ from subprocess import Popen, check_output
 from django.conf import settings
 from github3 import login
 from github3.models import GitHubError
-
 from demoservice.logging import get_demo_logger
 
 MIN_RUNSCRIPT_VERSION = '2.0.0'
@@ -282,6 +283,7 @@ def start_demo(
         'run.demo.github_user': github_user,
         'run.demo.github_repo': github_repo,
         'run.demo.github_pr': github_pr,
+        'run.demo.vcs_provider': "github"
     }
     for key, value in docker_labels.items():
         docker_options += " -l {key}={value}".format(key=key, value=value)
@@ -325,7 +327,7 @@ def stop_demo(
 
     local_path = os.path.join(settings.DEMO_DIR, demo_url)
     if not os.path.isdir(local_path):
-        return
+        return False
 
     # Check for the run command to clean
     run_command_path = os.path.join(local_path, 'run')
@@ -339,3 +341,154 @@ def stop_demo(
 
     logger.info('Deleting files for %s', demo_url)
     shutil.rmtree(local_path)
+
+
+def start_launchpad_demo(
+    demo_url,
+    user,
+    repo,
+    branch,
+    pr,
+    context=None
+):
+    logger = logging.getLogger(__name__)
+    os.makedirs(settings.DEMO_DIR, exist_ok=True)
+    local_path = os.path.join(settings.DEMO_DIR, demo_url)
+
+    # Create docker client
+    client = docker.from_env()
+
+    # Clone or update branch
+    if not os.path.isdir(local_path):
+        clone_url = "https://git.launchpad.net/{user}/{repo}/".format(
+            user=user,
+            repo=repo,
+        )
+
+        logger.info("Cloning git repo: %s", clone_url)
+        p = Popen(["git", "clone", clone_url, local_path])
+        return_code = p.wait()
+        if return_code > 0:
+            logger.error("Error while cloning %s", clone_url)
+            return False
+        logger.info("Checking out feature branch %s", branch)
+        p = Popen(["git", "checkout", branch], cwd=local_path)
+        return_code = p.wait()
+        if return_code > 0:
+            logger.error("Error while checkint out branch: %s", branch)
+            return False
+    else:
+        # Docker cleanup
+        logger.info("Running docker cleanup")
+        try:
+            container = client.containers.get(demo_url)
+            container.stop()
+            container.remove(v=True)
+            client.images.remove(image=demo_url)
+        except Exception as e:
+            logger.error(e)
+
+        # Pull latest changes on source branch
+        logger.info("Pulling latest changes for branch: %s", branch)
+        p = Popen(["git", "pull"], cwd=local_path)
+        return_code = p.wait()
+        if return_code > 0:
+            logger.error(
+                "Error while fetching latest changes for branch: %s",
+                branch
+            )
+            return False
+
+    # Docker build
+    logger.info("Building image %s", demo_url)
+    try:
+        docker_file = None
+        docker_file_path = "{}/Dockerfile".format(local_path)
+        if not os.path.exists(docker_file_path):
+            url = settings.DOCKERFILE_REPO_TEMPLATE.format(
+                "launchpad",
+                repo,
+                "Dockerfile"
+            )
+            response = urllib.request.urlopen(url)
+            data = response.read().decode("utf-8")
+            open(docker_file_path, "w").write(data)
+
+        client.images.build(
+            path=local_path,
+            tag=demo_url,
+            rm=True,
+        )
+    except Exception as e:
+        logger.info("Error building image: %s", e)
+        return False
+
+    # Docker start
+    logger.info("Starting container %s", demo_url)
+
+    # TODO: Make port allocation dynamic
+    # For now expose 5240 if maas or 80 if any other project
+    ports = {}
+    port = _get_open_port()
+    if repo == "maas":
+        ports[5240] = port
+    else:
+        ports[80] = port
+
+    # TODO: Fix views  and templates so we don't have to start
+    # launchpad demos with github prefixed labels.
+    docker_labels = {
+        "traefik.enable": "true",
+        "traefik.frontend.rule": "Host:{url}".format(url=demo_url),
+        "traefik.port": str(port),
+        "run.demo": "True",
+        "run.demo.url": demo_url,
+        "run.demo.url_full": "http://{}".format(demo_url),
+        "run.demo.github_user": user,
+        "run.demo.github_repo": repo,
+        "run.demo.github_pr": pr,
+        "run.demo.vcs_provider": "launchpad",
+    }
+
+    try:
+        client.containers.run(
+            demo_url,
+            name=demo_url,
+            ports=ports,
+            labels=docker_labels,
+            detach=True
+        )
+    except Exception as e:
+        logger.info("Error starting the container %s", e)
+        return False
+
+    message = "Starting demo at: {demo_url}".format(demo_url=demo_url)
+    logger.info(message)
+    return message
+
+
+def stop_launchpad_demo(
+    demo_url,
+    context=None
+):
+    logger = logging.getLogger(__name__)
+    logger.info("Stopping demo: %s", demo_url)
+
+    # Create docker client
+    client = docker.from_env()
+    try:
+        container = client.containers.get(demo_url)
+        container.stop()
+        container.remove(v=True)
+        client.images.remove(image=demo_url)
+    except Exception as e:
+        logger.error(e)
+        return False
+
+    local_path = os.path.join(settings.DEMO_DIR, demo_url)
+    if not os.path.isdir(local_path):
+        return False
+
+    logger.info("Deleting files for %s", demo_url)
+    shutil.rmtree(local_path)
+    logger.info("Demo %s removed.", demo_url)

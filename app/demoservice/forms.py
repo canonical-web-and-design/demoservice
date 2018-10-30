@@ -4,7 +4,7 @@ from demoservice.libs.github import (
     is_valid_github_url,
     get_github_info_from_url,
 )
-from demoservice.tasks import queue_start_demo, queue_stop_demo
+from demoservice.tasks.github import queue_start_demo, queue_stop_demo
 
 
 class DemoFormMixin(forms.Form):

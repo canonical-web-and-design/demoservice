@@ -40,7 +40,7 @@ Running the service with `DJANGO_DEBUG=True` will run the database as sqlite and
 
 The official Python documentation has a page on [virtual environments](https://docs.python.org/3/tutorial/venv.html). Another great option is [pyenv](https://github.com/pyenv/pyenv) with [pyenv-virtualenv](https://github.com/pyenv/pyenv-virtualenv).
 
-### (Optional) Running fake demos
+### Running fake demos
 
 The UI isn't useful without running demos. If you want to run a demo, there is a helper script for a lightweight demo:
 
@@ -53,4 +53,15 @@ They will run in the background. Delete all the demos with:
 
 ``` bash
 ./bin/delete_fake_demos
+```
+
+### Sending fake webhooks in development
+
+If you need to test the webhook views or simply need to fake a webhook, you can use the scripts provided in bin/. 
+You will find sample payloads to use with the scripts in bin/data. Webhook signature validation should be disabled in DEBUG mode.
+It's highly likely that you will need to customize this sample payloads to use them.
+
+``` bash
+./bin/send_fake_github_webhook bin/data/github.json
+./bin/send_fake_launchpad_webhook bin/data/launchpad.json
 ```

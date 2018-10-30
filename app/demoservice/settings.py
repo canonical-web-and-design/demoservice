@@ -175,6 +175,11 @@ if DEBUG:
 GITHUB_WEBHOOK_SECRET = os.environ.get('GITHUB_WEBHOOK_SECRET')
 LAUNCHPAD_WEBHOOK_SECRET = os.environ.get('LAUNCHPAD_WEBHOOK_SECRET')
 
+DOCKERFILE_REPO_TEMPLATE = (
+    "https://raw.githubusercontent.com/canonical-webteam/dockerfiles/master/"
+    "{}/{}/{}"
+)
+
 default_log_level = 'DEBUG' if DEBUG else 'WARNING'
 log_level = os.environ.get('LOG_LEVEL', default_log_level)
 LOGGING = {

@@ -1,6 +1,4 @@
-import os
-from celery import Celery, chain
-
+from celery import chain
 from demoservice.libs.demos import (
     get_demo_context,
     get_demo_url_pr,
@@ -9,20 +7,7 @@ from demoservice.libs.demos import (
     stop_demo,
 )
 from demoservice.logging import get_demo_logger
-
-# set the default Django settings module for the 'celery' program.
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'demoservice.settings')
-
-app = Celery('demoservice')
-
-# Using a string here means the worker don't have to serialize
-# the configuration object to child processes.
-# - namespace='CELERY' means all celery-related configuration keys
-#   should have a `CELERY_` prefix.
-app.config_from_object('django.conf:settings', namespace='CELERY')
-
-# Load task modules from all registered Django app configs.
-app.autodiscover_tasks()
+from demoservice.tasks import app
 
 
 @app.task(bind=True, max_retries=2)

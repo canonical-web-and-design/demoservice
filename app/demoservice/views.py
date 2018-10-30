@@ -12,23 +12,12 @@ from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import FormView
-
 from demoservice.forms import DemoStartForm, DemoStopForm
 from demoservice.libs.github import handle_webhook
+from demoservice.libs.launchpad import handle_webhook as handle_launchpad_webhook
 
 DEFAULT_VCS_USER = 'canonical-websites'
 logger = logging.getLogger(__name__)
-
-
-def demo_index(request):
-    docker_client = docker.from_env()
-    running_demos = docker_client.containers.list(
-        filters={
-            'status': 'running',
-            'label': 'run.demo',
-        }
-    )
-    return HttpResponse(running_demos)
 
 
 def _get_github_url(demo):
@@ -166,7 +155,7 @@ def _validate_webhook_signature(request, remote_signature, webhook_secret):
     """ Validate webhook is legit using X_HUB_SIGNATURE"""
     if not remote_signature:
         logger.debug('Missing HTTP_X_HUB_SIGNATURE HTTP header')
-        return HttpResponseForbidden('Missing signature header')
+        return False
     signature = hmac.new(
         webhook_secret.encode('ascii'),
         request.body,
@@ -175,7 +164,9 @@ def _validate_webhook_signature(request, remote_signature, webhook_secret):
     expected_signature = 'sha1=' + signature.hexdigest()
     if not hmac.compare_digest(remote_signature, expected_signature):
         logger.debug('Invalid webhook signature.')
-        return HttpResponseForbidden('Invalid signature header')
+        return False
+
+    return True
 
 
 @csrf_exempt
@@ -188,11 +179,12 @@ def github_webhook(request):
         'HTTP_X_HUB_SIGNATURE', None
     )
 
-    _validate_webhook_signature(
+    if not settings.DEBUG and not _validate_webhook_signature(
         request,
         github_signature,
         settings.GITHUB_WEBHOOK_SECRET
-    )
+    ):
+        return HttpResponseForbidden('Invalid webook signature')
 
     # Sometimes the payload comes in as the request body, sometimes it comes in
     # as a POST parameter. This will handle either case.
@@ -219,11 +211,12 @@ def launchpad_webhook(request):
         'HTTP_X_HUB_SIGNATURE', None
     )
 
-    _validate_webhook_signature(
+    if not settings.DEBUG and not _validate_webhook_signature(
         request,
         launchpad_signature,
         settings.LAUNCHPAD_WEBHOOK_SECRET
-    )
+    ):
+        return HttpResponseForbidden('Invalid webook signature')
 
     # Sometimes the payload comes in as the request body, sometimes it comes in
     # as a POST parameter. This will handle either case.
@@ -234,7 +227,6 @@ def launchpad_webhook(request):
 
     event = request.META['HTTP_X_LAUNCHPAD_EVENT_TYPE']
 
-    logger.debug("Event: %s", event)
-    logger.debug("Payload: %s", payload)
+    handle_launchpad_webhook(event, payload)
 
     return HttpResponse('Webhook received', status=http.HTTPStatus.ACCEPTED)

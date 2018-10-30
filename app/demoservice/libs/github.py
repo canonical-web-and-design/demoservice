@@ -1,5 +1,5 @@
 import re
-from demoservice.tasks import queue_start_demo, queue_stop_demo
+from demoservice.tasks.github import queue_start_demo, queue_stop_demo
 
 
 GITHUB_PR_URL_REGEX = re.compile(
