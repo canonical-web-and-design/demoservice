@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  <div class="strip">
+  <div class="p-strip">
     <div class="row">
       <div class="col-12">
         <h1>Running demos</h1>
@@ -10,11 +10,11 @@
     <div class="row">
       <div class="col-12">
         {% if demos %}
-        <table class="p-table" role="grid">
+          <table class="p-table" role="grid">
             <thead>
               <tr role="row">
                 <th scope="col" role="columnheader" id="t-url" aria-sort="none">Name</th>
-                <th scope="col" role="columnheader" id="t-github" aria-sort="none">GitHub</th>
+                <th scope="col" role="columnheader" id="t-github" aria-sort="none">VCS</th>
                 <th scope="col" role="columnheader" id="t-github" aria-sort="none">Options</th>
               </tr>
             </thead>
@@ -26,12 +26,14 @@
                       <a href="{{ demo.url_full }}">{{ demo.url }}</a>
                     </td>
                     <td role="gridcell">
-                      <a href="{{ demo.github_url }}" class="p-link--external">GitHub</a>
+                      <a href="{{ demo.github_url }}" class="p-link--external">{{ demo.vcs_provider }}</a>
                     </td>
                     <td role="gridcell">
-                      <a href="{% url 'demo_start'%}?url={{ demo.github_url }}">Update</a>
-                      <span> | </span>
-                      <a href="{% url 'demo_stop' %}?url={{ demo.github_url }}">Stop</a>
+                      {% if demo.vcs_provider != "launchpad" %}
+                        <a href="{% url 'demo_start'%}?url={{ demo.github_url }}">Update</a>
+                        <span> | </span>
+                        <a href="{% url 'demo_stop' %}?url={{ demo.github_url }}">Stop</a>
+                      {% endif %}
                     </td>
                   </tr>
                 {% endfor %}
@@ -39,7 +41,7 @@
             </tbody>
           </table>
         {% else %}
-          No currently running demos found.
+          No running demos found.
         {% endif %}
       </div>
     </div>
