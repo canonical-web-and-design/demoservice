@@ -14,6 +14,7 @@ from subprocess import Popen, check_output
 from django.conf import settings
 from github3 import login
 from github3.models import GitHubError
+from launchpadlib.launchpad import Launchpad
 from demoservice.logging import get_demo_logger
 
 MIN_RUNSCRIPT_VERSION = '2.0.0'
@@ -30,10 +31,26 @@ def _get_open_port():
     return port
 
 
-def _is_repo_collaborator(repo_owner, repo_name, user):
+def _is_github_repo_collaborator(repo_owner, repo_name, user):
     gh = login('-', password=settings.GITHUB_TOKEN)
     repo = gh.repository(repo_owner, repo_name)
     return repo.is_collaborator(user)
+
+
+def _is_launchpad_team_member(team_name, person_name):
+    lp = Launchpad.login_anonymously('demoservice', 'production')
+    try:
+        team = lp.people[team_name]
+        members = team.getMembersByStatus(status="Approved")
+        for member in members:
+            # Check for a username starting with '~' too.
+            if member.name == person_name or member.name == person_name[1:]:
+                return True
+    except Exception as e:
+        logger = logging.getLogger(__name__)
+        logger.error(e)
+
+    return False
 
 
 def get_demo_context(
@@ -139,7 +156,7 @@ def start_demo(
             github_repo,
         )
         try:
-            if not _is_repo_collaborator(
+            if not _is_github_repo_collaborator(
                 github_user,
                 github_repo,
                 github_sender
@@ -352,6 +369,22 @@ def start_launchpad_demo(
     context=None
 ):
     logger = logging.getLogger(__name__)
+
+    # Check is the user is member of any of the allowed teams
+    logger.info('Verifying if user is in allowed teams')
+    team_member = False
+    for team in settings.LAUNCHPAD_ALLOWED_TEAMS:
+        if _is_launchpad_team_member(team, user):
+            team_member = True
+            break
+
+    if not team_member:
+        logger.error(
+            "User is not a member of any of the allowed teams (%s)",
+            settings.LAUNCHPAD_ALLOWED_TEAMS
+        )
+        return False
+
     os.makedirs(settings.DEMO_DIR, exist_ok=True)
     local_path = os.path.join(settings.DEMO_DIR, demo_url)
 
