@@ -14,7 +14,9 @@ from django.views.generic.base import TemplateView
 from django.views.generic.edit import FormView
 from demoservice.forms import DemoStartForm, DemoStopForm
 from demoservice.libs.github import handle_webhook
-from demoservice.libs.launchpad import handle_webhook as handle_launchpad_webhook
+from demoservice.libs.launchpad import (
+    handle_webhook as handle_launchpad_webhook
+)
 
 DEFAULT_VCS_USER = 'canonical-websites'
 logger = logging.getLogger(__name__)
@@ -35,6 +37,24 @@ def _get_github_url(demo):
             id=demo['github_pr'],
         )
     return url
+
+
+def _get_launchpad_url(demo):
+    url = "https://code.launchpad.net/~{user}/{repo}/+git/{repo}/+merge/{id}".format(
+        id=demo["github_pr"],
+        repo=demo["github_repo"],
+        user=demo["github_user"]
+    )
+    return url
+
+
+def _get_url(demo):
+    if demo["vcs_provider"] == "github":
+        return _get_github_url(demo)
+    elif demo["vcs_provider"] == "launchpad":
+        return _get_launchpad_url(demo)
+    else:
+        return ""
 
 
 class DemoIndexView(TemplateView):
@@ -61,8 +81,9 @@ class DemoIndexView(TemplateView):
                 'github_repo': labels.get('run.demo.github_repo', ''),
                 'github_branch': labels.get('run.demo.github_branch', ''),
                 'github_pr': labels.get('run.demo.github_pr', ''),
+                'vcs_provider': labels.get('run.demo.vcs_provider', '')
             }
-            demo['github_url'] = _get_github_url(demo)
+            demo['github_url'] = _get_url(demo)
             is_duplicate_demo = any(
                 _demo['url'] == url for _demo in demos
             )
