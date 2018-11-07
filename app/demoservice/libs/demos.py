@@ -461,19 +461,20 @@ def start_launchpad_demo(
 
     # TODO: Make port allocation dynamic
     # For now expose 5240 if maas or 80 if any other project
-    ports = {}
-    port = _get_open_port()
+    container_port = 80
+    host_port = _get_open_port()
+
     if repo == "maas":
-        ports[5240] = port
-    else:
-        ports[80] = port
+        container_port = 5240
+
+    ports = {container_port: host_port}
 
     # TODO: Fix views  and templates so we don't have to start
     # launchpad demos with github prefixed labels.
     docker_labels = {
         "traefik.enable": "true",
         "traefik.frontend.rule": "Host:{url}".format(url=demo_url),
-        "traefik.port": str(port),
+        "traefik.port": str(container_port),
         "run.demo": "True",
         "run.demo.url": demo_url,
         "run.demo.url_full": "http://{}".format(demo_url),
