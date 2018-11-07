@@ -6,7 +6,7 @@ COPY . /app
 RUN apk update \
     # apk upgrade && \
     && apk add --no-cache bash git openssh postgresql python3 \
-    && apk add --no-cache --virtual build-dependencies build-base gcc make musl-dev postgresql-dev python3-dev \
+    && apk add --no-cache --virtual build-dependencies build-base gcc libffi-dev make musl-dev postgresql-dev python3-dev \
     && echo "### INSTALL PYTHON3/PIP3" \
     && python3 -m ensurepip \
     && rm -r /usr/lib/python*/ensurepip \

@@ -70,7 +70,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'demoservice.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
@@ -98,7 +97,6 @@ if POSTGRES_HOST:
         }
     }
 
-
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
 
@@ -117,7 +115,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/1.11/topics/i18n/
 
@@ -131,12 +128,10 @@ USE_L10N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
 STATIC_URL = '/static/'
-
 
 AUTHENTICATION_BACKENDS = (
     'django_openid_auth.auth.OpenIDBackend',
@@ -173,6 +168,8 @@ if DEBUG:
     DEMO_DIR = os.path.join(BASE_DIR, 'demos')
 
 GITHUB_WEBHOOK_SECRET = os.environ.get('GITHUB_WEBHOOK_SECRET')
+
+LAUNCHPAD_ALLOWED_TEAMS = ["canonical-webmonkeys"]
 LAUNCHPAD_WEBHOOK_SECRET = os.environ.get('LAUNCHPAD_WEBHOOK_SECRET')
 
 DOCKERFILE_REPO_TEMPLATE = (
