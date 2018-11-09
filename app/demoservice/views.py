@@ -40,7 +40,7 @@ def _get_github_url(demo):
 
 
 def _get_launchpad_url(demo):
-    url = "https://code.launchpad.net/~{user}/{repo}/+git/{repo}/+merge/{id}".format(
+    url = "https://code.launchpad.net/{user}/{repo}/+git/{repo}/+merge/{id}".format(
         id=demo["github_pr"],
         repo=demo["github_repo"],
         user=demo["github_user"]
