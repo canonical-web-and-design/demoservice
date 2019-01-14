@@ -18,15 +18,20 @@ A close version to the production set up can be started using docker compose. Al
 docker-compose up
 ```
 
-    or if you want to run it in the background
-
-``` bash
-docker-compose up -d
-```
+(or if you want to run it in the background, use `docker-compose up -d`)
 
 This runs on the web app on http://0.0.0.0:8099. It should work well for simple development.
 
 Check the instructions below for running fake demos if you want to quickly update templates.
+
+*Dependencies require a rebuild:*
+
+Every time dependencies change, you'll need to recreate the images before running the app again:
+
+``` bash
+docker-compose build
+docker-compose up
+```
 
 #### The hard way (Python virtual env)
 
