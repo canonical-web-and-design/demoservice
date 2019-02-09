@@ -28,7 +28,7 @@ services:
 
   demoservice-rabbit:
     hostname: demoservice-rabbit
-    image: rabbitmq:3.6
+    image: rabbitmq:3.7
     environment:
      - "RABBITMQ_DEFAULT_USER=guest"
      - "RABBITMQ_DEFAULT_PASS=guest"

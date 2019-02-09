@@ -1,4 +1,4 @@
-FROM docker:17.05.0-ce
+FROM docker:17.12.1-ce
 
 WORKDIR /app
 COPY . /app
