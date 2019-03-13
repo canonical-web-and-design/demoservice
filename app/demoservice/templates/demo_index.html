@@ -15,6 +15,7 @@
               <tr role="row">
                 <th scope="col" role="columnheader" id="t-url" aria-sort="none">Name</th>
                 <th scope="col" role="columnheader" id="t-github" aria-sort="none">VCS</th>
+                <th scope="col" role="columnheader" id="t-github" aria-sort="none">PR State</th>
                 <th scope="col" role="columnheader" id="t-github" aria-sort="none">Options</th>
               </tr>
             </thead>
@@ -27,6 +28,12 @@
                     </td>
                     <td role="gridcell">
                       <a href="{{ demo.github_url }}" class="p-link--external">{{ demo.vcs_provider }}</a>
+                    </td>
+                    <td>
+                      <span
+                        class="js-pr-state"
+                        data-url="https://api.github.com/repos/{{demo.github_user}}/{{demo.github_repo}}/pulls/{{demo.github_pr}}"
+                      ></span>
                     </td>
                     <td role="gridcell">
                       {% if demo.vcs_provider != "launchpad" %}
@@ -46,4 +53,17 @@
       </div>
     </div>
   </div>
+  <script>
+    var states = document.querySelectorAll('.js-pr-state');
+    states.forEach(function (state) {
+      var url = state.dataset.url;
+      fetch(url)
+        .then(function(response) {
+          return response.json();
+        })
+        .then(function(json) {
+          state.innerHTML = json ? json.state : "Could not fetch";
+        });
+    });
+  </script>
 {% endblock %}
