@@ -10,6 +10,7 @@
     <div class="row">
       <div class="col-12">
         {% if demos %}
+          <button class="p-button--positive" onclick="checkPrStates();">Check PR States</button>
           <table class="p-table" role="grid">
             <thead>
               <tr role="row">
@@ -33,7 +34,7 @@
                       <span
                         class="js-pr-state"
                         data-url="https://api.github.com/repos/{{demo.github_user}}/{{demo.github_repo}}/pulls/{{demo.github_pr}}"
-                      ></span>
+                      >Not checked</span>
                     </td>
                     <td role="gridcell">
                       {% if demo.vcs_provider != "launchpad" %}
@@ -54,16 +55,18 @@
     </div>
   </div>
   <script>
-    var states = document.querySelectorAll('.js-pr-state');
-    states.forEach(function (state) {
-      var url = state.dataset.url;
-      fetch(url)
-        .then(function(response) {
-          return response.json();
-        })
-        .then(function(json) {
-          state.innerHTML = json ? json.state : "Could not fetch";
-        });
-    });
+    function checkPrStates() {
+      var states = document.querySelectorAll('.js-pr-state');
+      states.forEach(function (state) {
+        var url = state.dataset.url;
+        fetch(url)
+          .then(function(response) {
+            return response.json();
+          })
+          .then(function(json) {
+            state.innerHTML = json ? json.state : "Could not fetch";
+          });
+      });
+    }
   </script>
 {% endblock %}
