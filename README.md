@@ -1,4 +1,4 @@
-# Demo service
+# Old Demo service
 
 Spin up ./run demos!
 
