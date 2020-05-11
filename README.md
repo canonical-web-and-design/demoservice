@@ -1,4 +1,4 @@
-# Demo service asdadsasdads
+# Demo service 2
 
 Spin up ./run demos!
 
